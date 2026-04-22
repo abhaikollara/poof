@@ -1,6 +1,6 @@
 # poof
 
-Temporary directories that disappear after their TTL expires. No daemon, no cron — just lazy cleanup on every invocation.
+Temporary directories that disappear after their TTL expires.
 
 ## Install
 
@@ -69,10 +69,23 @@ poof clean
 poof gc
 ```
 
+### Daemon
+
+A background daemon automatically deletes expired directories. It starts automatically on `poof new`, or you can manage it manually:
+
+```sh
+poof daemon start     # start the background daemon
+poof daemon stop      # stop it
+poof daemon status    # check if it's running
+```
+
+The daemon polls every 10 seconds. Lazy sweep on each command still runs as a fallback.
+
 ## How it works
 
 - `poof new mydir 1h` creates `mydir` directly and tracks it. Without a name, it creates a `poof-XXXXXX` directory in the current directory.
-- Every command runs a lazy sweep that removes directories whose TTL has expired.
+- A background daemon polls every 10s and deletes expired directories. It auto-starts on `poof new`.
+- Every command also runs a lazy sweep as a fallback in case the daemon isn't running.
 - The registry is written atomically (write to `.tmp`, then rename) and protected by a file lock for concurrent access.
 
 ## Safety guardrails

@@ -97,6 +97,9 @@ If no arguments are given, a poof-XXXXXX directory is created with a 1h TTL.`,
 				return err
 			}
 
+			// Ensure the daemon is running so the dir gets cleaned up on time.
+			ensureDaemon()
+
 			fmt.Println(targetPath)
 			return nil
 		},

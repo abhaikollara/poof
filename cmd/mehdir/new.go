@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"abhai.dev/poof/internal/registry"
-	"abhai.dev/poof/internal/ttl"
+	"abhai.dev/mehdir/internal/registry"
+	"abhai.dev/mehdir/internal/ttl"
 	"github.com/spf13/cobra"
 )
 
@@ -18,8 +18,8 @@ func newCmd() *cobra.Command {
 		Long: `Create a new temporary directory.
 
 If PATH is given, that directory is created and tracked directly.
-If only a TTL is given, a poof-XXXXXX directory is created in the current directory.
-If no arguments are given, a poof-XXXXXX directory is created with a 1h TTL.`,
+If only a TTL is given, a mehdir-XXXXXX directory is created in the current directory.
+If no arguments are given, a mehdir-XXXXXX directory is created with a 1h TTL.`,
 		Args: cobra.MaximumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Parse args: distinguish between (PATH, TTL), (TTL-only), or nothing.
@@ -44,42 +44,42 @@ If no arguments are given, a poof-XXXXXX directory is created with a 1h TTL.`,
 
 			dur, err := ttl.Parse(ttlStr)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "poof: %v\n", err)
+				fmt.Fprintf(os.Stderr, "mehdir: %v\n", err)
 				os.Exit(exitUserError)
 			}
 
 			if autoName {
-				// Auto-generate a poof-XXXXXX dir in CWD.
+				// Auto-generate a mehdir-XXXXXX dir in CWD.
 				cwd, err := os.Getwd()
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "poof: getting working directory: %v\n", err)
+					fmt.Fprintf(os.Stderr, "mehdir: getting working directory: %v\n", err)
 					os.Exit(exitInternalError)
 				}
-				targetPath, err = os.MkdirTemp(cwd, "poof-")
+				targetPath, err = os.MkdirTemp(cwd, "mehdir-")
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "poof: creating temp dir: %v\n", err)
+					fmt.Fprintf(os.Stderr, "mehdir: creating temp dir: %v\n", err)
 					os.Exit(exitInternalError)
 				}
 			} else {
 				targetPath, err = filepath.Abs(targetPath)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "poof: resolving path: %v\n", err)
+					fmt.Fprintf(os.Stderr, "mehdir: resolving path: %v\n", err)
 					os.Exit(exitInternalError)
 				}
 				if err := os.MkdirAll(targetPath, 0700); err != nil {
-					fmt.Fprintf(os.Stderr, "poof: creating directory: %v\n", err)
+					fmt.Fprintf(os.Stderr, "mehdir: creating directory: %v\n", err)
 					os.Exit(exitInternalError)
 				}
 			}
 
 			if err := os.Chmod(targetPath, 0700); err != nil {
-				fmt.Fprintf(os.Stderr, "poof: chmod: %v\n", err)
+				fmt.Fprintf(os.Stderr, "mehdir: chmod: %v\n", err)
 				os.Exit(exitInternalError)
 			}
 
 			err = withRegistry(false, true, func(reg *registry.Registry) error {
 				if _, existing := reg.FindByPath(targetPath); existing != nil {
-					fmt.Fprintf(os.Stderr, "poof: %s is already tracked\n", targetPath)
+					fmt.Fprintf(os.Stderr, "mehdir: %s is already tracked\n", targetPath)
 					os.Exit(exitUserError)
 				}
 

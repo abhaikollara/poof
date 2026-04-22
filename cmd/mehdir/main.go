@@ -11,9 +11,9 @@ func main() {
 	cobra.EnableTraverseRunHooks = true
 
 	root := &cobra.Command{
-		Use:   "poof",
+		Use:   "mehdir",
 		Short: "Temporary directories that disappear after their TTL expires",
-		Long:  "poof creates temporary directories with a configurable TTL.\nDirectories are automatically cleaned up by a background daemon.",
+		Long:  "mehdir creates temporary directories with a configurable TTL.\nDirectories are automatically cleaned up by a background daemon.",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -21,12 +21,13 @@ func main() {
 	}
 
 	root.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
-		fmt.Fprintf(os.Stderr, "poof: %v\n", err)
+		fmt.Fprintf(os.Stderr, "mehdir: %v\n", err)
 		os.Exit(exitUserError)
 		return nil
 	})
 
 	root.AddCommand(newCmd())
+	root.AddCommand(addCmd())
 	root.AddCommand(lsCmd())
 	root.AddCommand(rmCmd())
 	root.AddCommand(extendCmd())

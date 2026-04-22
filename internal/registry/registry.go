@@ -28,13 +28,13 @@ type Entry struct {
 // registryDir returns the directory for the registry file.
 func registryDir() string {
 	if d := os.Getenv("XDG_CONFIG_HOME"); d != "" {
-		return filepath.Join(d, "poof")
+		return filepath.Join(d, "mehdir")
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
 		home = os.TempDir()
 	}
-	return filepath.Join(home, ".config", "poof")
+	return filepath.Join(home, ".config", "mehdir")
 }
 
 // RegistryPath returns the path to the registry JSON file.
@@ -68,7 +68,7 @@ func Lock() (*os.File, error) {
 		}
 		if time.Now().After(deadline) {
 			f.Close()
-			return nil, fmt.Errorf("could not acquire registry lock after 5s (another poof process running?)")
+			return nil, fmt.Errorf("could not acquire registry lock after 5s (another mehdir process running?)")
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
@@ -140,7 +140,7 @@ func (r *Registry) RemoveIndex(i int) {
 	r.Entries = append(r.Entries[:i], r.Entries[i+1:]...)
 }
 
-// AddAllowedPrefix registers a directory as an allowed parent for poof dirs.
+// AddAllowedPrefix registers a directory as an allowed parent for mehdir dirs.
 // Deduplicates against existing prefixes.
 func (r *Registry) AddAllowedPrefix(dir string) {
 	cleaned := filepath.Clean(dir)

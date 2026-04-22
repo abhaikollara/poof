@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"abhai.dev/poof/internal/registry"
+	"abhai.dev/mehdir/internal/registry"
 )
 
 // Run removes expired entries from the registry, deleting their directories.
@@ -15,7 +15,7 @@ func Run(reg *registry.Registry, now time.Time) {
 	for _, e := range reg.Entries {
 		if now.After(e.ExpiresAt) {
 			if err := safeRemove(e.Path, reg.AllowedPrefixes); err != nil {
-				fmt.Fprintf(os.Stderr, "poof: sweep: skipping %s: %v\n", e.Path, err)
+				fmt.Fprintf(os.Stderr, "mehdir: sweep: skipping %s: %v\n", e.Path, err)
 			}
 			continue
 		}

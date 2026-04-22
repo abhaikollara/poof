@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"abhai.dev/poof/internal/registry"
-	"abhai.dev/poof/internal/sweep"
+	"abhai.dev/mehdir/internal/registry"
+	"abhai.dev/mehdir/internal/sweep"
 )
 
 const PollInterval = 10 * time.Second
@@ -31,14 +31,14 @@ func Run(stop <-chan struct{}) {
 func doSweep() {
 	lock, err := registry.Lock()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "poof-daemon: lock: %v\n", err)
+		fmt.Fprintf(os.Stderr, "mehdir-daemon: lock: %v\n", err)
 		return
 	}
 	defer registry.Unlock(lock)
 
 	reg, err := registry.Load()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "poof-daemon: load: %v\n", err)
+		fmt.Fprintf(os.Stderr, "mehdir-daemon: load: %v\n", err)
 		return
 	}
 
@@ -48,7 +48,7 @@ func doSweep() {
 
 	if before != after {
 		if err := registry.Save(reg); err != nil {
-			fmt.Fprintf(os.Stderr, "poof-daemon: save: %v\n", err)
+			fmt.Fprintf(os.Stderr, "mehdir-daemon: save: %v\n", err)
 		}
 	}
 }

@@ -1,4 +1,4 @@
-module abhai.dev/poof
+module abhai.dev/mehdir
 
 go 1.26.1
 

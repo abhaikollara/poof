@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"abhai.dev/poof/internal/registry"
+	"abhai.dev/mehdir/internal/registry"
 )
 
 func TestSweepRemovesExpired(t *testing.T) {
-	expired := filepath.Join(os.TempDir(), "poof-expired-test")
-	alive := filepath.Join(os.TempDir(), "poof-alive-test")
+	expired := filepath.Join(os.TempDir(), "mehdir-expired-test")
+	alive := filepath.Join(os.TempDir(), "mehdir-alive-test")
 	os.MkdirAll(expired, 0700)
 	os.MkdirAll(alive, 0700)
 	defer os.RemoveAll(expired)
@@ -44,7 +44,7 @@ func TestSweepRemovesExpired(t *testing.T) {
 }
 
 func TestGCRemovesOrphans(t *testing.T) {
-	existing := filepath.Join(os.TempDir(), "poof-gc-exists")
+	existing := filepath.Join(os.TempDir(), "mehdir-gc-exists")
 	os.MkdirAll(existing, 0700)
 	defer os.RemoveAll(existing)
 
@@ -52,7 +52,7 @@ func TestGCRemovesOrphans(t *testing.T) {
 		Version: 1,
 		Entries: []registry.Entry{
 			{Path: existing},
-			{Path: "/tmp/poof-gc-gone-does-not-exist"},
+			{Path: "/tmp/mehdir-gc-gone-does-not-exist"},
 		},
 	}
 

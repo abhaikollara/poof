@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"abhai.dev/poof/internal/registry"
-	"abhai.dev/poof/internal/sweep"
+	"abhai.dev/mehdir/internal/registry"
+	"abhai.dev/mehdir/internal/sweep"
 )
 
 const (
@@ -20,14 +20,14 @@ const (
 func withRegistry(sweepBefore, sweepAfter bool, fn func(reg *registry.Registry) error) error {
 	lock, err := registry.Lock()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "poof: %v\n", err)
+		fmt.Fprintf(os.Stderr, "mehdir: %v\n", err)
 		os.Exit(exitInternalError)
 	}
 	defer registry.Unlock(lock)
 
 	reg, err := registry.Load()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "poof: %v\n", err)
+		fmt.Fprintf(os.Stderr, "mehdir: %v\n", err)
 		os.Exit(exitInternalError)
 	}
 
@@ -44,7 +44,7 @@ func withRegistry(sweepBefore, sweepAfter bool, fn func(reg *registry.Registry) 
 	}
 
 	if err := registry.Save(reg); err != nil {
-		fmt.Fprintf(os.Stderr, "poof: %v\n", err)
+		fmt.Fprintf(os.Stderr, "mehdir: %v\n", err)
 		os.Exit(exitInternalError)
 	}
 	return nil

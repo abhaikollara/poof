@@ -15,14 +15,14 @@ func TestSafeToDelete(t *testing.T) {
 		extraPrefixes []string
 		wantErr       bool
 	}{
-		{"valid temp path", "/tmp/poof-abc123", nil, false},
-		{"valid var tmp", "/var/tmp/poof-abc123", nil, false},
+		{"valid temp path", "/tmp/mehdir-abc123", nil, false},
+		{"valid var tmp", "/var/tmp/mehdir-abc123", nil, false},
 		{"valid temp any name", "/tmp/foobar", nil, false},
-		{"relative path", "poof-abc123", nil, true},
+		{"relative path", "mehdir-abc123", nil, true},
 		{"root path", "/", nil, true},
 		{"bare tmp", "/tmp", nil, true},
 		{"bare var tmp", "/var/tmp", nil, true},
-		{"outside temp", "/home/user/poof-abc123", nil, true},
+		{"outside temp", "/home/user/mehdir-abc123", nil, true},
 		{"home dir", func() string { h, _ := os.UserHomeDir(); return h }(), nil, true},
 		{"custom prefix allowed", "/projects/work/mydir", []string{"/projects/work"}, false},
 		{"custom prefix not registered", "/projects/work/mydir", nil, true},
@@ -47,7 +47,7 @@ func TestAtomicWrite(t *testing.T) {
 		Version: 1,
 		Entries: []Entry{
 			{
-				Path:      "/tmp/poof-abc123",
+				Path:      "/tmp/mehdir-abc123",
 				CreatedAt: time.Now().UTC(),
 				ExpiresAt: time.Now().Add(1 * time.Hour).UTC(),
 			},
@@ -58,7 +58,7 @@ func TestAtomicWrite(t *testing.T) {
 		t.Fatalf("Save: %v", err)
 	}
 
-	path := filepath.Join(dir, "poof", "registry.json")
+	path := filepath.Join(dir, "mehdir", "registry.json")
 	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("reading saved registry: %v", err)
@@ -68,7 +68,7 @@ func TestAtomicWrite(t *testing.T) {
 	if err := json.Unmarshal(data, &loaded); err != nil {
 		t.Fatalf("unmarshaling: %v", err)
 	}
-	if len(loaded.Entries) != 1 || loaded.Entries[0].Path != "/tmp/poof-abc123" {
+	if len(loaded.Entries) != 1 || loaded.Entries[0].Path != "/tmp/mehdir-abc123" {
 		t.Errorf("unexpected entries: %+v", loaded.Entries)
 	}
 
@@ -82,18 +82,18 @@ func TestFindByPath(t *testing.T) {
 	reg := &Registry{
 		Version: 1,
 		Entries: []Entry{
-			{Path: "/tmp/poof-foo"},
-			{Path: "/tmp/poof-bar"},
+			{Path: "/tmp/mehdir-foo"},
+			{Path: "/tmp/mehdir-bar"},
 		},
 	}
 
-	if i, e := reg.FindByPath("/tmp/poof-foo"); i != 0 || e.Path != "/tmp/poof-foo" {
+	if i, e := reg.FindByPath("/tmp/mehdir-foo"); i != 0 || e.Path != "/tmp/mehdir-foo" {
 		t.Errorf("expected to find foo at 0, got %d", i)
 	}
-	if i, e := reg.FindByPath("/tmp/poof-bar"); i != 1 || e.Path != "/tmp/poof-bar" {
+	if i, e := reg.FindByPath("/tmp/mehdir-bar"); i != 1 || e.Path != "/tmp/mehdir-bar" {
 		t.Errorf("expected to find bar at 1, got %d", i)
 	}
-	if i, _ := reg.FindByPath("/tmp/poof-nope"); i != -1 {
+	if i, _ := reg.FindByPath("/tmp/mehdir-nope"); i != -1 {
 		t.Errorf("expected -1 for missing, got %d", i)
 	}
 }

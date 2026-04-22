@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"abhai.dev/poof/internal/registry"
-	"abhai.dev/poof/internal/sweep"
+	"abhai.dev/mehdir/internal/registry"
+	"abhai.dev/mehdir/internal/sweep"
 	"github.com/spf13/cobra"
 )
 
@@ -17,9 +17,9 @@ func gcCmd() *cobra.Command {
 			return withRegistry(true, false, func(reg *registry.Registry) error {
 				removed := sweep.GC(reg)
 				if removed == 0 {
-					fmt.Fprintln(os.Stderr, "poof: no orphaned entries")
+					fmt.Fprintln(os.Stderr, "mehdir: no orphaned entries")
 				} else {
-					fmt.Fprintf(os.Stderr, "poof: removed %d orphaned entries\n", removed)
+					fmt.Fprintf(os.Stderr, "mehdir: removed %d orphaned entries\n", removed)
 				}
 				return nil
 			})

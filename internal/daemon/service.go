@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	launchdLabel = "com.poof.daemon"
-	systemdUnit  = "poof.service"
+	launchdLabel = "com.mehdir.daemon"
+	systemdUnit  = "mehdir.service"
 )
 
 // launchd plist template
@@ -42,7 +42,7 @@ var launchdTmpl = template.Must(template.New("plist").Parse(`<?xml version="1.0"
 
 // systemd unit template
 var systemdTmpl = template.Must(template.New("unit").Parse(`[Unit]
-Description=poof temporary directory cleanup daemon
+Description=mehdir temporary directory cleanup daemon
 
 [Service]
 ExecStart={{.ExePath}} daemon run
@@ -65,7 +65,7 @@ func systemdUnitPath() string {
 
 func logPath() string {
 	home, _ := os.UserHomeDir()
-	dir := filepath.Join(home, ".config", "poof")
+	dir := filepath.Join(home, ".config", "mehdir")
 	os.MkdirAll(dir, 0700)
 	return filepath.Join(dir, "daemon.log")
 }
@@ -187,7 +187,7 @@ func Start() error {
 	case "darwin":
 		path := launchdPlistPath()
 		if _, err := os.Stat(path); os.IsNotExist(err) {
-			return fmt.Errorf("daemon not installed (run: poof daemon install)")
+			return fmt.Errorf("daemon not installed (run: mehdir daemon install)")
 		}
 		out, err := exec.Command("launchctl", "load", "-w", path).CombinedOutput()
 		if err != nil {

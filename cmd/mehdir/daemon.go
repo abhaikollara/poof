@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"abhai.dev/poof/internal/daemon"
+	"abhai.dev/mehdir/internal/daemon"
 	"github.com/spf13/cobra"
 )
 
@@ -36,10 +36,10 @@ func daemonInstallCmd() *cobra.Command {
 		Short: "Install and start the daemon as a system service",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := daemon.Install(); err != nil {
-				fmt.Fprintf(os.Stderr, "poof: %v\n", err)
+				fmt.Fprintf(os.Stderr, "mehdir: %v\n", err)
 				os.Exit(exitInternalError)
 			}
-			fmt.Fprintln(os.Stderr, "poof: daemon installed and started")
+			fmt.Fprintln(os.Stderr, "mehdir: daemon installed and started")
 			return nil
 		},
 	}
@@ -51,10 +51,10 @@ func daemonUninstallCmd() *cobra.Command {
 		Short: "Stop and remove the daemon service",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := daemon.Uninstall(); err != nil {
-				fmt.Fprintf(os.Stderr, "poof: %v\n", err)
+				fmt.Fprintf(os.Stderr, "mehdir: %v\n", err)
 				os.Exit(exitInternalError)
 			}
-			fmt.Fprintln(os.Stderr, "poof: daemon uninstalled")
+			fmt.Fprintln(os.Stderr, "mehdir: daemon uninstalled")
 			return nil
 		},
 	}
@@ -66,10 +66,10 @@ func daemonStartCmd() *cobra.Command {
 		Short: "Start the daemon service",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := daemon.Start(); err != nil {
-				fmt.Fprintf(os.Stderr, "poof: %v\n", err)
+				fmt.Fprintf(os.Stderr, "mehdir: %v\n", err)
 				os.Exit(exitUserError)
 			}
-			fmt.Fprintln(os.Stderr, "poof: daemon started")
+			fmt.Fprintln(os.Stderr, "mehdir: daemon started")
 			return nil
 		},
 	}
@@ -81,10 +81,10 @@ func daemonStopCmd() *cobra.Command {
 		Short: "Stop the daemon service",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := daemon.Stop(); err != nil {
-				fmt.Fprintf(os.Stderr, "poof: %v\n", err)
+				fmt.Fprintf(os.Stderr, "mehdir: %v\n", err)
 				os.Exit(exitUserError)
 			}
-			fmt.Fprintln(os.Stderr, "poof: daemon stopped")
+			fmt.Fprintln(os.Stderr, "mehdir: daemon stopped")
 			return nil
 		},
 	}
@@ -97,10 +97,10 @@ func daemonStatusCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			status, err := daemon.Status()
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "poof: %v\n", err)
+				fmt.Fprintf(os.Stderr, "mehdir: %v\n", err)
 				os.Exit(exitInternalError)
 			}
-			fmt.Fprintf(os.Stderr, "poof: daemon %s\n", status)
+			fmt.Fprintf(os.Stderr, "mehdir: daemon %s\n", status)
 			return nil
 		},
 	}
@@ -134,8 +134,8 @@ func ensureDaemon() {
 		return
 	}
 	if err := daemon.Install(); err != nil {
-		fmt.Fprintf(os.Stderr, "poof: warning: could not install daemon: %v\n", err)
+		fmt.Fprintf(os.Stderr, "mehdir: warning: could not install daemon: %v\n", err)
 	} else {
-		fmt.Fprintln(os.Stderr, "poof: daemon installed and started")
+		fmt.Fprintln(os.Stderr, "mehdir: daemon installed and started")
 	}
 }

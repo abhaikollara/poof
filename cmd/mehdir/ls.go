@@ -8,7 +8,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"abhai.dev/poof/internal/registry"
+	"abhai.dev/mehdir/internal/registry"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +21,7 @@ func lsCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return withRegistry(true, false, func(reg *registry.Registry) error {
 				if len(reg.Entries) == 0 {
-					fmt.Fprintln(os.Stderr, "poof: no active temp dirs")
+					fmt.Fprintln(os.Stderr, "mehdir: no active temp dirs")
 					return nil
 				}
 

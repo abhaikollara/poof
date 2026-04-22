@@ -19,36 +19,51 @@ func newCmd() *cobra.Command {
 
 If PATH is given, that directory is created and tracked directly.
 If only a TTL is given, an auto-named directory is created in the current directory.
-If no arguments are given, an auto-named directory is created with a 1h TTL.
+If no arguments are given, an auto-named directory is created with the default TTL.
 
-The auto-generated prefix defaults to "mehdir-" and can be changed with "mehdir config prefix".`,
+The auto-generated prefix and default TTL can be changed with "mehdir config".`,
 		Args: cobra.MaximumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var targetPath string
-			ttlStr := "1h"
+			var ttlStr string
 			autoName := true
+			ttlExplicit := false
 
 			switch len(args) {
 			case 2:
 				targetPath = args[0]
 				ttlStr = args[1]
 				autoName = false
+				ttlExplicit = true
 			case 1:
-				if _, err := ttl.Parse(args[0]); err == nil {
+				// If it exists on disk, treat as a path even if it parses as a TTL.
+				// e.g. "2d" could be a directory name or "2 days".
+				if _, statErr := os.Stat(args[0]); statErr == nil {
+					targetPath = args[0]
+					autoName = false
+				} else if _, err := ttl.Parse(args[0]); err == nil {
 					ttlStr = args[0]
+					ttlExplicit = true
 				} else {
 					targetPath = args[0]
 					autoName = false
 				}
 			}
 
-			dur, err := ttl.Parse(ttlStr)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "mehdir: %v\n", err)
-				os.Exit(exitUserError)
-			}
+			var createdPath string
 
-			err = withRegistry(false, true, func(reg *registry.Registry) error {
+			err := withRegistry(false, true, func(reg *registry.Registry) error {
+				// Resolve TTL: use explicit value, or fall back to config default.
+				if !ttlExplicit {
+					ttlStr = reg.GetTTL()
+				}
+
+				dur, err := ttl.Parse(ttlStr)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "mehdir: %v\n", err)
+					os.Exit(exitUserError)
+				}
+
 				if autoName {
 					cwd, err := os.Getwd()
 					if err != nil {
@@ -90,6 +105,7 @@ The auto-generated prefix defaults to "mehdir-" and can be changed with "mehdir 
 					CreatedAt: now,
 					ExpiresAt: now.Add(dur),
 				})
+				createdPath = targetPath
 				return nil
 			})
 			if err != nil {
@@ -98,7 +114,7 @@ The auto-generated prefix defaults to "mehdir-" and can be changed with "mehdir 
 
 			ensureDaemon()
 
-			fmt.Println(targetPath)
+			fmt.Println(createdPath)
 			return nil
 		},
 	}

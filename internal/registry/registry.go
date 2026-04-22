@@ -11,7 +11,10 @@ import (
 	"time"
 )
 
-const DefaultPrefix = "mehdir-"
+const (
+	DefaultPrefix = "mehdir-"
+	DefaultTTL    = "1h"
+)
 
 // Registry represents the on-disk registry file.
 type Registry struct {
@@ -19,6 +22,7 @@ type Registry struct {
 	Entries         []Entry  `json:"entries"`
 	AllowedPrefixes []string `json:"allowed_prefixes,omitempty"`
 	Prefix          string   `json:"prefix,omitempty"`
+	TTL             string   `json:"ttl,omitempty"`
 }
 
 // GetPrefix returns the configured prefix, falling back to the default.
@@ -27,6 +31,14 @@ func (r *Registry) GetPrefix() string {
 		return r.Prefix
 	}
 	return DefaultPrefix
+}
+
+// GetTTL returns the configured default TTL string, falling back to "1h".
+func (r *Registry) GetTTL() string {
+	if r.TTL != "" {
+		return r.TTL
+	}
+	return DefaultTTL
 }
 
 // Entry is a single tracked temporary directory.

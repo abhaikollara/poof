@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"abhai.dev/mehdir/internal/registry"
+	"abhai.dev/mehdir/internal/ttl"
 	"github.com/spf13/cobra"
 )
 
@@ -16,12 +17,14 @@ func configCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return withRegistry(false, false, func(reg *registry.Registry) error {
 				fmt.Fprintf(os.Stderr, "prefix: %s\n", reg.GetPrefix())
+				fmt.Fprintf(os.Stderr, "ttl:    %s\n", reg.GetTTL())
 				return nil
 			})
 		},
 	}
 
 	cmd.AddCommand(configPrefixCmd())
+	cmd.AddCommand(configTTLCmd())
 	return cmd
 }
 
@@ -38,6 +41,29 @@ func configPrefixCmd() *cobra.Command {
 				}
 				reg.Prefix = args[0]
 				fmt.Fprintf(os.Stderr, "mehdir: prefix set to %q\n", args[0])
+				return nil
+			})
+		},
+	}
+}
+
+func configTTLCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "ttl [DURATION]",
+		Short: "Get or set the default TTL for new directories",
+		Args:  cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return withRegistry(false, false, func(reg *registry.Registry) error {
+				if len(args) == 0 {
+					fmt.Fprintln(os.Stdout, reg.GetTTL())
+					return nil
+				}
+				if _, err := ttl.Parse(args[0]); err != nil {
+					fmt.Fprintf(os.Stderr, "mehdir: %v\n", err)
+					os.Exit(exitUserError)
+				}
+				reg.TTL = args[0]
+				fmt.Fprintf(os.Stderr, "mehdir: default TTL set to %q\n", args[0])
 				return nil
 			})
 		},

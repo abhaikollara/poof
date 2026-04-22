@@ -128,14 +128,24 @@ func daemonRunCmd() *cobra.Command {
 	}
 }
 
-// ensureDaemon installs the daemon service if not already installed.
+// ensureDaemon installs and/or starts the daemon if it's not running.
 func ensureDaemon() {
-	if daemon.Installed() {
+	if !daemon.Installed() {
+		if err := daemon.Install(); err != nil {
+			fmt.Fprintf(os.Stderr, "mehdir: warning: could not install daemon: %v\n", err)
+		} else {
+			fmt.Fprintln(os.Stderr, "mehdir: daemon installed and started")
+		}
 		return
 	}
-	if err := daemon.Install(); err != nil {
-		fmt.Fprintf(os.Stderr, "mehdir: warning: could not install daemon: %v\n", err)
-	} else {
-		fmt.Fprintln(os.Stderr, "mehdir: daemon installed and started")
+	// Installed but maybe not running — check and restart if needed.
+	status, err := daemon.Status()
+	if err != nil {
+		return
+	}
+	if status == "not running" || status == "inactive" {
+		if err := daemon.Start(); err != nil {
+			fmt.Fprintf(os.Stderr, "mehdir: warning: could not start daemon: %v\n", err)
+		}
 	}
 }

@@ -37,20 +37,26 @@ func cleanslateCmd() *cobra.Command {
 				}
 
 				removed := 0
+				var kept []registry.Entry
 				for _, e := range reg.Entries {
 					if err := registry.SafeToDelete(e.Path, reg.AllowedPrefixes); err != nil {
 						fmt.Fprintf(os.Stderr, "mehdir: skipping %s: %v\n", e.Path, err)
+						kept = append(kept, e)
 						continue
 					}
 					if err := os.RemoveAll(e.Path); err != nil {
 						fmt.Fprintf(os.Stderr, "mehdir: removing %s: %v\n", e.Path, err)
+						kept = append(kept, e)
 						continue
 					}
 					removed++
 				}
 
-				reg.Entries = nil
+				reg.Entries = kept
 				fmt.Fprintf(os.Stderr, "mehdir: removed %d directories\n", removed)
+				if len(kept) > 0 {
+					fmt.Fprintf(os.Stderr, "mehdir: %d entries could not be removed\n", len(kept))
+				}
 				return nil
 			})
 		},

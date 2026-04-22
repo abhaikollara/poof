@@ -29,23 +29,29 @@ make build  # binary in bin/
 ### Create a temp directory
 
 ```sh
-# Named directory in the current dir, 5 minute TTL
-mehdir new myproject 5m
-
-# Absolute path, 2 hour TTL
-mehdir new /tmp/scratch 2h
-
-# Auto-generated name (mehdir-XXXXXX) in current dir, 30 minute TTL
-mehdir new 30m
-
 # Auto-generated name, default 1 hour TTL
-mehdir new
+mehdir
+
+# Auto-generated name, 5 minute TTL
+mehdir 5m
+
+# Named directory, 2 hour TTL
+mehdir new myproject 2h
+
+# Absolute path
+mehdir new /tmp/scratch 30m
 
 # Shell-friendly: cd into it
 cd "$(mehdir new workspace 1d)"
 ```
 
 TTL supports `s`, `m`, `h`, `d` (days), and `w` (weeks): `30m`, `2h`, `1d12h`, `2w`.
+
+### Track an existing directory
+
+```sh
+mehdir add ./my-existing-dir 2h
+```
 
 ### List active directories
 
@@ -67,6 +73,12 @@ mehdir extend /path/to/myproject 3h
 mehdir rm /path/to/myproject
 ```
 
+### Delete everything
+
+```sh
+mehdir cleanslate  # asks for confirmation
+```
+
 ### Force cleanup of expired entries
 
 ```sh
@@ -77,6 +89,16 @@ mehdir clean
 
 ```sh
 mehdir gc
+```
+
+### Configuration
+
+```sh
+mehdir config               # show current config
+mehdir config prefix        # show auto-generated directory prefix
+mehdir config prefix tmp-   # set prefix to "tmp-" (default: "mehdir-")
+mehdir config ttl           # show default TTL
+mehdir config ttl 30m       # set default TTL to 30 minutes (default: "1h")
 ```
 
 ### Daemon
@@ -100,7 +122,8 @@ Logs are at `~/.config/mehdir/daemon.log`.
 
 ## How it works
 
-- `mehdir new mydir 1h` creates `mydir` directly and tracks it. Without a name, it creates a `mehdir-XXXXXX` directory in the current directory.
+- `mehdir new mydir 1h` creates `mydir` directly and tracks it. Without a name, it creates a prefixed directory in the current directory.
+- `mehdir add` tracks an existing directory without creating it.
 - A background daemon (launchd/systemd) polls every 10s and deletes expired directories. It auto-installs on first `mehdir new`.
 - Every command also runs a lazy sweep as a fallback in case the daemon isn't running.
 - The registry is written atomically (write to `.tmp`, then rename) and protected by a file lock for concurrent access.

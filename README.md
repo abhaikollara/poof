@@ -19,15 +19,23 @@ make build
 ### Create a temp directory
 
 ```sh
-# Default: 1 hour TTL
-cd "$(poof new)"
+# Named directory in the current dir, 5 minute TTL
+poof new myproject 5m
 
-# Custom TTL and label
-poof new --ttl 2h --label scratch
+# Absolute path, 2 hour TTL
+poof new /tmp/scratch 2h
 
-# Supports d (days) and w (weeks)
-poof new --ttl 7d --label weekly-build
+# Auto-generated name (poof-XXXXXX) in current dir, 30 minute TTL
+poof new 30m
+
+# Auto-generated name, default 1 hour TTL
+poof new
+
+# Shell-friendly: cd into it
+cd "$(poof new workspace 1d)"
 ```
+
+TTL supports `s`, `m`, `h`, `d` (days), and `w` (weeks): `30m`, `2h`, `1d12h`, `2w`.
 
 ### List active directories
 
@@ -39,15 +47,14 @@ poof ls --json
 ### Extend the TTL
 
 ```sh
-# Reset expiry to 3 hours from now
-poof extend scratch --ttl 3h
+# Reset expiry to 3 hours from now (replaces, not additive)
+poof extend /path/to/myproject 3h
 ```
 
 ### Remove immediately
 
 ```sh
-poof rm scratch
-poof rm /tmp/poof-a4f2b9
+poof rm /path/to/myproject
 ```
 
 ### Force cleanup of expired entries
@@ -64,7 +71,7 @@ poof gc
 
 ## How it works
 
-- `poof new` creates a directory via `os.MkdirTemp` (pattern `poof-XXXXXX`, mode 0700) and registers it in `~/.config/poof/registry.json`.
+- `poof new mydir 1h` creates `mydir` directly and tracks it. Without a name, it creates a `poof-XXXXXX` directory in the current directory.
 - Every command runs a lazy sweep that removes directories whose TTL has expired.
 - The registry is written atomically (write to `.tmp`, then rename) and protected by a file lock for concurrent access.
 
@@ -73,9 +80,8 @@ poof gc
 Before deleting any directory, poof verifies:
 
 1. The path is absolute.
-2. The path is under `$TMPDIR`, `/tmp`, or `/var/tmp`.
+2. The path is under a known allowed prefix (`$TMPDIR`, `/tmp`, `/var/tmp`, or any parent directory previously used with `poof new`).
 3. The path is not `/`, `/tmp`, `/var/tmp`, or the user's home directory.
-4. The basename starts with `poof-`.
 
 If any check fails, the entry is skipped and an error is logged to stderr.
 
@@ -88,5 +94,5 @@ The registry lives at `$XDG_CONFIG_HOME/poof/registry.json` (default: `~/.config
 | Code | Meaning |
 |------|---------|
 | 0 | Success |
-| 1 | User error (bad flag, label not found) |
+| 1 | User error (bad flag, path not found) |
 | 2 | Internal error (registry corrupt, lock timeout) |

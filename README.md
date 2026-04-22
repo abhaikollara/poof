@@ -71,20 +71,27 @@ poof gc
 
 ### Daemon
 
-A background daemon automatically deletes expired directories. It starts automatically on `poof new`, or you can manage it manually:
+A background daemon automatically deletes expired directories. It auto-installs as a system service on first `poof new`.
 
 ```sh
-poof daemon start     # start the background daemon
-poof daemon stop      # stop it
+poof daemon install   # install and start as a system service
+poof daemon uninstall # stop and remove the service
+poof daemon start     # start the service
+poof daemon stop      # stop the service
 poof daemon status    # check if it's running
 ```
 
-The daemon polls every 10 seconds. Lazy sweep on each command still runs as a fallback.
+On macOS this uses **launchd** (`~/Library/LaunchAgents/com.poof.daemon.plist`).
+On Linux this uses **systemd** (`~/.config/systemd/user/poof.service`).
+
+The daemon polls every 10 seconds. The service auto-restarts on crash and starts on login. Lazy sweep on each command still runs as a fallback.
+
+Logs are at `~/.config/poof/daemon.log`.
 
 ## How it works
 
 - `poof new mydir 1h` creates `mydir` directly and tracks it. Without a name, it creates a `poof-XXXXXX` directory in the current directory.
-- A background daemon polls every 10s and deletes expired directories. It auto-starts on `poof new`.
+- A background daemon (launchd/systemd) polls every 10s and deletes expired directories. It auto-installs on first `poof new`.
 - Every command also runs a lazy sweep as a fallback in case the daemon isn't running.
 - The registry is written atomically (write to `.tmp`, then rename) and protected by a file lock for concurrent access.
 

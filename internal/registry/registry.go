@@ -11,11 +11,22 @@ import (
 	"time"
 )
 
+const DefaultPrefix = "mehdir-"
+
 // Registry represents the on-disk registry file.
 type Registry struct {
 	Version         int      `json:"version"`
 	Entries         []Entry  `json:"entries"`
 	AllowedPrefixes []string `json:"allowed_prefixes,omitempty"`
+	Prefix          string   `json:"prefix,omitempty"`
+}
+
+// GetPrefix returns the configured prefix, falling back to the default.
+func (r *Registry) GetPrefix() string {
+	if r.Prefix != "" {
+		return r.Prefix
+	}
+	return DefaultPrefix
 }
 
 // Entry is a single tracked temporary directory.

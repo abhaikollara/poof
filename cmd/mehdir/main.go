@@ -34,6 +34,7 @@ func main() {
 	root.AddCommand(extendCmd())
 	root.AddCommand(cleanCmd())
 	root.AddCommand(cleanslateCmd())
+	root.AddCommand(configCmd())
 	root.AddCommand(gcCmd())
 	root.AddCommand(daemonCmd())
 

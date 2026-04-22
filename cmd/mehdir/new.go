@@ -18,11 +18,12 @@ func newCmd() *cobra.Command {
 		Long: `Create a new temporary directory.
 
 If PATH is given, that directory is created and tracked directly.
-If only a TTL is given, a mehdir-XXXXXX directory is created in the current directory.
-If no arguments are given, a mehdir-XXXXXX directory is created with a 1h TTL.`,
+If only a TTL is given, an auto-named directory is created in the current directory.
+If no arguments are given, an auto-named directory is created with a 1h TTL.
+
+The auto-generated prefix defaults to "mehdir-" and can be changed with "mehdir config prefix".`,
 		Args: cobra.MaximumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// Parse args: distinguish between (PATH, TTL), (TTL-only), or nothing.
 			var targetPath string
 			ttlStr := "1h"
 			autoName := true
@@ -33,7 +34,6 @@ If no arguments are given, a mehdir-XXXXXX directory is created with a 1h TTL.`,
 				ttlStr = args[1]
 				autoName = false
 			case 1:
-				// Is it a TTL or a path? Try parsing as TTL first.
 				if _, err := ttl.Parse(args[0]); err == nil {
 					ttlStr = args[0]
 				} else {
@@ -48,36 +48,35 @@ If no arguments are given, a mehdir-XXXXXX directory is created with a 1h TTL.`,
 				os.Exit(exitUserError)
 			}
 
-			if autoName {
-				// Auto-generate a mehdir-XXXXXX dir in CWD.
-				cwd, err := os.Getwd()
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "mehdir: getting working directory: %v\n", err)
-					os.Exit(exitInternalError)
-				}
-				targetPath, err = os.MkdirTemp(cwd, "mehdir-")
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "mehdir: creating temp dir: %v\n", err)
-					os.Exit(exitInternalError)
-				}
-			} else {
-				targetPath, err = filepath.Abs(targetPath)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "mehdir: resolving path: %v\n", err)
-					os.Exit(exitInternalError)
-				}
-				if err := os.MkdirAll(targetPath, 0700); err != nil {
-					fmt.Fprintf(os.Stderr, "mehdir: creating directory: %v\n", err)
-					os.Exit(exitInternalError)
-				}
-			}
-
-			if err := os.Chmod(targetPath, 0700); err != nil {
-				fmt.Fprintf(os.Stderr, "mehdir: chmod: %v\n", err)
-				os.Exit(exitInternalError)
-			}
-
 			err = withRegistry(false, true, func(reg *registry.Registry) error {
+				if autoName {
+					cwd, err := os.Getwd()
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "mehdir: getting working directory: %v\n", err)
+						os.Exit(exitInternalError)
+					}
+					targetPath, err = os.MkdirTemp(cwd, reg.GetPrefix())
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "mehdir: creating temp dir: %v\n", err)
+						os.Exit(exitInternalError)
+					}
+				} else {
+					targetPath, err = filepath.Abs(targetPath)
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "mehdir: resolving path: %v\n", err)
+						os.Exit(exitInternalError)
+					}
+					if err := os.MkdirAll(targetPath, 0700); err != nil {
+						fmt.Fprintf(os.Stderr, "mehdir: creating directory: %v\n", err)
+						os.Exit(exitInternalError)
+					}
+				}
+
+				if err := os.Chmod(targetPath, 0700); err != nil {
+					fmt.Fprintf(os.Stderr, "mehdir: chmod: %v\n", err)
+					os.Exit(exitInternalError)
+				}
+
 				if _, existing := reg.FindByPath(targetPath); existing != nil {
 					fmt.Fprintf(os.Stderr, "mehdir: %s is already tracked\n", targetPath)
 					os.Exit(exitUserError)
@@ -97,7 +96,6 @@ If no arguments are given, a mehdir-XXXXXX directory is created with a 1h TTL.`,
 				return err
 			}
 
-			// Ensure the daemon is running so the dir gets cleaned up on time.
 			ensureDaemon()
 
 			fmt.Println(targetPath)

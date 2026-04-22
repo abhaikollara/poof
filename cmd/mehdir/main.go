@@ -15,8 +15,9 @@ func main() {
 		Short: "Temporary directories that disappear after their TTL expires",
 		Long:  "mehdir creates temporary directories with a configurable TTL.\nDirectories are automatically cleaned up by a background daemon.",
 		SilenceUsage: true,
+		Args: cobra.ArbitraryArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmd.Help()
+			return newCmd().RunE(cmd, args)
 		},
 	}
 
@@ -32,6 +33,7 @@ func main() {
 	root.AddCommand(rmCmd())
 	root.AddCommand(extendCmd())
 	root.AddCommand(cleanCmd())
+	root.AddCommand(cleanslateCmd())
 	root.AddCommand(gcCmd())
 	root.AddCommand(daemonCmd())
 
